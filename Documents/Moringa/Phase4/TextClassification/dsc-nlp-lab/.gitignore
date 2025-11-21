@@ -1,0 +1,17 @@
+# Ignore everything except files in this repo
+/*
+!.gitignore
+# Ignore everything by default
+/*
+
+# Except these important repo files
+!.gitignore
+!README.md
+!LICENSE.md
+!dsc-nlp-lab.ipynb
+!splitter.py
+!classes.png
+!CONTRIBUTING.md
+!env/
+!dsc-github-actions-files/
+
