@@ -103,15 +103,15 @@ categories = [
 ]
 
 newsgroups_train = fetch_20newsgroups(
-    subset=None,
-    remove=None,
-    categories=None
+    subset="train",
+    remove=('headers', 'footers', 'quotes'),
+    categories=categories
 )
 
 newsgroups_test = fetch_20newsgroups(
-    subset=None,
-    remove=None,
-    categories=None
+    subset="test",
+    remove=('headers', 'footers', 'quotes'),
+    categories=categories
 )
 ```
 
@@ -135,10 +135,10 @@ pd.set_option('max_colwidth', 400)
 pd.set_option('use_mathjax', False)
 
 # Extract values from Bunch objects
-X_train = pd.DataFrame(None, columns=["text"])
-X_test = pd.DataFrame(None, columns=["text"])
-y_train = pd.Series(None, name="category")
-y_test = pd.Series(None, name="category")
+X_train = pd.DataFrame(newsgroups_train.data, columns=["text"])
+X_test = pd.DataFrame(newsgroups_test.data, columns=["text"])
+y_train = pd.Series(newsgroups_train.target, name="category")
+y_test = pd.Series(newsgroups_test.target, name="category")
 ```
 
 Double-check that your variables have the correct shape below:
@@ -255,7 +255,7 @@ In the cell below, perform the same operation on the full `X_train`:
 # Replace None with appropriate code
 
 # Transform text in X_train to lowercase
-None
+X_train["text"] = X_train["text"].str.lower()
 ```
 
 Double-check your work by looking at an example and making sure the text is lowercase:
@@ -341,7 +341,7 @@ In the cell below, apply the same operation on `X_train`:
 # Replace None with appropriate code
 
 # Create column text_tokenized on X_train
-None
+X_train["text_tokenized"] = X_train["text"].apply(tokenizer.tokenize)
 ```
 
 Visually inspect your work below:
@@ -435,10 +435,11 @@ In the cell below, complete the same process for the full `X_train`:
 # Replace None with appropriate code
 
 # Create a frequency distribution for X_train
-train_freq_dist = None
+train_freq_dist = FreqDist(X_train["text_tokenized"].explode())
 
 # Plot the top 10 tokens
-None
+visualize_top_10(train_freq_dist, "Top 10 Word Frequency for Full X_train")
+
 ```
 
 Ok great, we have a general sense of the word frequencies in our dataset!
@@ -523,14 +524,14 @@ In the cell below, import the vectorizer, instantiate a vectorizer object, and f
 # Replace None with appropriate code
 
 # Import the relevant vectorizer class
-None
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # Instantiate a vectorizer with max_features=10
 # (we are using the default token pattern)
-tfidf = None
+tfidf = TfidfVectorizer(max_features=10)
 
 # Fit the vectorizer on X_train["text"] and transform it
-X_train_vectorized = None
+X_train_vectorized = tfidf.fit_transform(X_train["text"])
 
 # Visually inspect the 10 most common words
 pd.DataFrame.sparse.from_spmatrix(X_train_vectorized, columns=tfidf.get_feature_names_out())
@@ -557,14 +558,14 @@ Now that we have preprocessed data, fit and evaluate a multinomial Naive Bayes c
 # Replace None with appropriate code
 
 # Import relevant class and function
-None
-None
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import cross_val_score
 
 # Instantiate a MultinomialNB classifier
-baseline_model = None
+baseline_model = MultinomialNB()
 
 # Evaluate the classifier on X_train_vectorized and y_train
-baseline_cv = cross_val_score(None, None, None)
+baseline_cv = cross_val_score(baseline_model, X_train_vectorized, y_train)
 baseline_cv
 ```
 
@@ -636,7 +637,8 @@ def remove_stopwords(token_list):
     that are also present in stopwords_list have been
     removed
     """
-    None
+     stopwords_removed = [token for token in token_list if token not in stopwords_list]
+    return stopwords_removed
 ```
 
 Test it out on one example:
@@ -720,7 +722,6 @@ Recall that currently we are using the default token pattern, which finds words 
 
 Here we have provided a custom tokenizing function:
 
-
 ```python
 # Run this cell without changes
 from nltk.stem.snowball import SnowballStemmer
@@ -759,8 +760,11 @@ In the cells below, repeat the modeling process from earlier. This time when ins
 # Replace None with appropriate code
 
 # Instantiate the vectorizer
-tfidf = None
-
+tfidf = TfidfVectorizer(
+    max_features=10,
+    stop_words=stemmed_stopwords,
+    tokenizer=stem_and_tokenize
+)
 # Fit the vectorizer on X_train["text"] and transform it
 X_train_vectorized = tfidf.fit_transform(X_train["text"])
 
@@ -937,7 +941,7 @@ Let's try increasing `max_features` from 10 to 200:
 
 # Instantiate the vectorizer
 tfidf = TfidfVectorizer(
-    max_features=None,
+    max_features=200,
     stop_words=stemmed_stopwords,
     tokenizer=stem_and_tokenize
 )
@@ -1046,7 +1050,11 @@ Interpret the results seen above. How well did the model do? How does it compare
 ```python
 # Replace None with appropriate text
 """
-None
+The model achieved about 75% accuracy, much higher than the 20% expected by random guessing. Most misclassifications involved 
+posts between rec.sport.hockey, sci.crypt, and talk.politics.misc. 
+
+Next steps include analyzing misclassified examples and possibly improving feature engineering, though some errors may be 
+unavoidable due to the nature of the dataset.
 """
 ```
 
