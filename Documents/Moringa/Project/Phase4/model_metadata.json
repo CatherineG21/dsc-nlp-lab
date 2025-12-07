@@ -1,0 +1,23 @@
+{
+  "model_type": "LinearSVC (Tuned with GridSearchCV)",
+  "accuracy": 0.6871907641561298,
+  "classes": [
+    "Negative",
+    "Neutral",
+    "Positive"
+  ],
+  "trained_date": "2025-12-07 12:36:13",
+  "best_params": {
+    "model__C": 0.1,
+    "tfidf__max_df": 1.0,
+    "tfidf__max_features": 7000,
+    "tfidf__min_df": 2,
+    "tfidf__ngram_range": [
+      1,
+      2
+    ]
+  },
+  "cv_score": 0.6730352829097342,
+  "training_size": 7273,
+  "test_size": 1819
+}
